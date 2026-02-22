@@ -5,6 +5,7 @@ import { useToast } from "./Toast";
 import GlassCard from "./GlassCard";
 import PermissionCheckboxes from "./PermissionCheckboxes";
 import LoadingSpinner from "./LoadingSpinner";
+import { findOrgPda, findRolePda } from "../pda";
 import {
   parsePublicKey,
   validateOrgId,
@@ -92,6 +93,33 @@ export default function ActionPanel({ onSuccess, onError }: Props) {
   const [deactivateOrgId, setDeactivateOrgId] = useState("");
   const [closeOrgId, setCloseOrgId] = useState("");
   const [closeRoleName, setCloseRoleName] = useState("");
+  const [fetchingPerms, setFetchingPerms] = useState(false);
+
+  async function fetchCurrentPerms() {
+    if (!program || !updateOrgId || !updateRoleName.trim()) {
+      toast.error("Enter Org ID and Role name first");
+      return;
+    }
+    try {
+      const oid = validateOrgId(updateOrgId);
+      const name = validateName(updateRoleName, "Role name");
+      setFetchingPerms(true);
+      const [orgPda] = findOrgPda(oid);
+      const [rolePda] = findRolePda(orgPda, name);
+      const roleAccount = await (program.account as any).role.fetch(rolePda);
+      setUpdatePerms(roleAccount.permissions as number);
+      toast.info(`Loaded current permissions for "${name}"`);
+    } catch (e: any) {
+      const msg = e.message || "Failed to fetch role";
+      if (msg.includes("Account does not exist")) {
+        toast.error("Role not found on-chain");
+      } else {
+        toast.error(msg);
+      }
+    } finally {
+      setFetchingPerms(false);
+    }
+  }
 
   function toggle(section: string) {
     setOpenSection((prev) => (prev === section ? null : section));
@@ -233,14 +261,35 @@ export default function ActionPanel({ onSuccess, onError }: Props) {
         <div className="space-y-2.5">
           <input className={inputClass} placeholder="Org ID" value={updateOrgId} onChange={(e) => setUpdateOrgId(e.target.value)} type="number" min="0" />
           <input className={inputClass} placeholder="Role name" value={updateRoleName} onChange={(e) => setUpdateRoleName(e.target.value)} />
+          <button
+            type="button"
+            onClick={fetchCurrentPerms}
+            disabled={fetchingPerms || !updateOrgId || !updateRoleName.trim()}
+            className="w-full py-1.5 px-3 rounded-lg text-xs font-medium text-slate-400 hover:text-purple-300 bg-white/[0.03] border border-white/[0.06] hover:border-purple-500/20 transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+          >
+            {fetchingPerms ? <LoadingSpinner size="sm" /> : (
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            )}
+            Load current permissions
+          </button>
           <PermissionCheckboxes value={updatePerms} onChange={setUpdatePerms} />
           <button className={btnClass} disabled={loading || !updateOrgId || !updateRoleName.trim() || !updatePerms}
             onClick={() => {
               try {
                 const oid = validateOrgId(updateOrgId);
                 const name = validateName(updateRoleName, "Role name");
-                const perms = validatePermissions(updatePerms);
-                run(() => updateRolePermissions(program!, publicKey!, oid, name, perms), `Updated "${name}" permissions`);
+                const selectedPerms = validatePermissions(updatePerms);
+                run(async () => {
+                  // Fetch current on-chain permissions and merge with user selection
+                  const [orgPda] = findOrgPda(oid);
+                  const [rolePda] = findRolePda(orgPda, name);
+                  const roleAccount = await (program!.account as any).role.fetch(rolePda);
+                  const currentPerms = roleAccount.permissions as number;
+                  const mergedPerms = currentPerms | selectedPerms;
+                  return updateRolePermissions(program!, publicKey!, oid, name, mergedPerms);
+                }, `Updated "${name}" permissions`);
               } catch (e: any) { toast.error(e.message); }
             }}>
             {loading && <LoadingSpinner size="sm" />}Update Permissions
