@@ -61,8 +61,13 @@ export default function PermissionTestPanel({ onResult }: Props) {
       onResult(sig, `Permission test: ${permName} - GRANTED`, "success");
       toast.success(`${permName} permission verified!`);
     } catch (err: any) {
-      const msg =
+      let msg =
         err.error?.errorMessage || err.message || "Permission check failed";
+      if (msg.includes("Account does not exist")) {
+        msg = "No membership found for this wallet in the selected org";
+      } else if (msg.includes("Unauthorized")) {
+        msg = `Wallet lacks ${permName} permission in this org`;
+      }
       setResult({
         success: false,
         message: `Access Denied - ${msg}`,
@@ -140,7 +145,7 @@ export default function PermissionTestPanel({ onResult }: Props) {
                   : "bg-red-500/10 border-red-500/25"
               }`}
             >
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-start gap-2.5 min-w-0">
                 {result.success ? (
                   <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
                     <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -155,7 +160,7 @@ export default function PermissionTestPanel({ onResult }: Props) {
                   </div>
                 )}
                 <span
-                  className={`text-sm font-medium ${
+                  className={`text-sm font-medium break-words min-w-0 ${
                     result.success ? "text-emerald-300" : "text-red-300"
                   }`}
                 >

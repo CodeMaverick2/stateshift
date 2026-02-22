@@ -54,7 +54,7 @@ export default function TransactionLog({ transactions }: Props) {
                 )}
               </div>
 
-              <span className="text-slate-300 flex-1 truncate text-xs">
+              <span className="text-slate-300 flex-1 truncate text-xs" title={tx.description}>
                 {tx.description}
               </span>
 

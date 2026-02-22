@@ -83,12 +83,12 @@ function ToastItem({ toast }: { toast: ToastItem }) {
 
   return (
     <div
-      className={`flex items-center gap-2 px-4 py-3 rounded-xl border backdrop-blur-xl shadow-lg text-sm max-w-sm transition-all duration-300 ${
+      className={`flex items-start gap-2.5 px-4 py-3 rounded-xl border backdrop-blur-xl shadow-lg text-sm max-w-md transition-all duration-300 ${
         colors[toast.type]
       } ${visible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"}`}
     >
-      {icons[toast.type]}
-      <span className="truncate">{toast.message}</span>
+      <span className="flex-shrink-0 mt-0.5">{icons[toast.type]}</span>
+      <span className="break-words min-w-0 line-clamp-3">{toast.message}</span>
     </div>
   );
 }

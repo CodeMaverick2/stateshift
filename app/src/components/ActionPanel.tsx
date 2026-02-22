@@ -24,13 +24,19 @@ interface Props {
 
 function extractError(err: any): string {
   if (err.error?.errorCode) {
-    return `${err.error.errorCode.code}: ${err.error.errorMessage}`;
+    return err.error.errorMessage || err.error.errorCode.code;
   }
   if (err.logs) {
     const anchorErr = err.logs.find((l: string) => l.includes("Error Code:"));
-    if (anchorErr) return anchorErr;
+    if (anchorErr) {
+      const match = anchorErr.match(/Error Message:\s*(.+)/);
+      if (match) return match[1].trim().replace(/\.$/, "");
+    }
   }
-  return err.message || "Transaction failed";
+  const msg = err.message || "Transaction failed";
+  if (msg.includes("Account does not exist")) return "Account not found on-chain";
+  if (msg.includes("User rejected")) return "Transaction cancelled by user";
+  return msg.length > 120 ? msg.slice(0, 117) + "..." : msg;
 }
 
 const ICONS: Record<string, JSX.Element> = {
