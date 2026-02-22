@@ -1,7 +1,11 @@
 import NetworkBadge from "./NetworkBadge";
 import WalletButton from "./WalletButton";
 
-export default function Navbar() {
+interface Props {
+  onRefresh?: () => void;
+}
+
+export default function Navbar({ onRefresh }: Props) {
   return (
     <nav className="sticky top-0 z-40 backdrop-blur-2xl bg-[#050a18]/70 border-b border-white/[0.04]">
       <div className="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
@@ -27,6 +31,17 @@ export default function Navbar() {
 
         <div className="flex items-center gap-3">
           <NetworkBadge />
+          {onRefresh && (
+            <button
+              onClick={onRefresh}
+              className="p-2 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] hover:border-purple-500/30 transition-all group"
+              title="Refresh data"
+            >
+              <svg className="w-4 h-4 text-slate-500 group-hover:text-purple-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          )}
           <WalletButton />
         </div>
       </div>

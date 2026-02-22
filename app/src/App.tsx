@@ -113,25 +113,11 @@ function Dashboard() {
       <div className="bg-grid" />
 
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Navbar />
+        <Navbar onRefresh={triggerRefresh} />
 
         <main className="max-w-[1400px] mx-auto px-6 py-8 flex-1 w-full">
-          {/* Dashboard heading + refresh */}
-          <div className="flex items-center gap-3 mb-6 animate-slide-up">
-            <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-            <button
-              onClick={triggerRefresh}
-              className="p-2 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] hover:border-purple-500/30 transition-all group"
-              title="Refresh data"
-            >
-              <svg className="w-4 h-4 text-slate-500 group-hover:text-purple-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </button>
-          </div>
-
           {/* System Overview */}
-          <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.05s", opacity: 0 }}>
+          <div className="mb-8 animate-slide-up">
             <SystemOverview refreshCounter={refreshCounter} />
           </div>
 
