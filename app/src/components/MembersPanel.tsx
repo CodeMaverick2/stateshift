@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { PublicKey } from "@solana/web3.js";
 import { MemberEntry } from "../hooks/useMembers";
 import { RoleEntry } from "../hooks/useRoles";
@@ -20,6 +21,14 @@ const icon = (
 );
 
 export default function MembersPanel({ orgPubkey, members, roles, loading }: Props) {
+  const [search, setSearch] = useState("");
+
+  const filtered = members.filter(
+    (m) =>
+      m.account.user.toBase58().toLowerCase().includes(search.toLowerCase()) ||
+      m.pubkey.toBase58().toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <GlassCard title="Members" icon={icon}>
       {!orgPubkey ? (
@@ -40,15 +49,33 @@ export default function MembersPanel({ orgPubkey, members, roles, loading }: Pro
           No members in this organization
         </p>
       ) : (
-        <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-          {members.map((m) => (
-            <MemberCard
-              key={m.pubkey.toBase58()}
-              member={m}
-              roles={roles}
+        <>
+          <div className="relative mb-3">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search by address..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-purple-500/40 transition-all"
             />
-          ))}
-        </div>
+          </div>
+          <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1">
+            {filtered.length === 0 ? (
+              <p className="text-slate-500 text-xs text-center py-6">No matching members</p>
+            ) : (
+              filtered.map((m) => (
+                <MemberCard
+                  key={m.pubkey.toBase58()}
+                  member={m}
+                  roles={roles}
+                />
+              ))
+            )}
+          </div>
+        </>
       )}
     </GlassCard>
   );

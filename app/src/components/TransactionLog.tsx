@@ -20,9 +20,40 @@ const icon = (
   </svg>
 );
 
+function downloadLogs(transactions: TransactionEntry[]) {
+  const lines = transactions.map(
+    (tx) =>
+      `${new Date(tx.timestamp).toISOString()}\t${tx.status}\t${tx.description}\t${tx.sig || "—"}`
+  );
+  const csv = ["Timestamp\tStatus\tDescription\tSignature", ...lines].join("\n");
+  const blob = new Blob([csv], { type: "text/tab-separated-values" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `stateshift-txlog-${Date.now()}.tsv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function TransactionLog({ transactions }: Props) {
   return (
-    <GlassCard title="Transaction Log" icon={icon}>
+    <GlassCard
+      title="Transaction Log"
+      icon={icon}
+      headerRight={
+        transactions.length > 0 ? (
+          <button
+            onClick={() => downloadLogs(transactions)}
+            className="flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-purple-400 transition-colors bg-white/[0.04] hover:bg-purple-500/10 border border-white/[0.06] hover:border-purple-500/20 rounded-lg px-2.5 py-1"
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Export
+          </button>
+        ) : undefined
+      }
+    >
       {transactions.length === 0 ? (
         <div className="text-center py-6">
           <p className="text-slate-600 text-sm">

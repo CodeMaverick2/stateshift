@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 interface Props {
   title?: string;
   icon?: ReactNode;
+  headerRight?: ReactNode;
   children: ReactNode;
   className?: string;
   glow?: boolean;
@@ -11,6 +12,7 @@ interface Props {
 export default function GlassCard({
   title,
   icon,
+  headerRight,
   children,
   className = "",
   glow = false,
@@ -22,9 +24,10 @@ export default function GlassCard({
           {icon && (
             <span className="text-purple-400/80">{icon}</span>
           )}
-          <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+          <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-400 flex-1">
             {title}
           </h3>
+          {headerRight}
         </div>
       )}
       <div className="p-5">{children}</div>
