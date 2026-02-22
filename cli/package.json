@@ -1,0 +1,24 @@
+{
+  "name": "stateshift-cli",
+  "version": "0.1.0",
+  "description": "CLI client for the StateShift on-chain RBAC Solana Anchor program",
+  "main": "dist/index.js",
+  "bin": {
+    "stateshift": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/index.ts",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.31.1",
+    "@solana/web3.js": "^1.95.3",
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.0"
+  }
+}

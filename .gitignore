@@ -1,0 +1,14 @@
+.anchor
+.DS_Store
+target
+**/*.rs.bk
+node_modules
+.claude
+test-ledger
+.yarn
+cli/dist
+app/dist
+pkg-config-*
+*.log
+.env
+.env.*

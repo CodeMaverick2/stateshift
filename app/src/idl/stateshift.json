@@ -1,0 +1,1001 @@
+{
+  "address": "4ECHQUfa66A4U8fL7kbrM9hMfWXwEXi8z75Ds3EW6MUb",
+  "metadata": {
+    "name": "stateshift",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "assign_role",
+      "discriminator": [
+        255,
+        174,
+        125,
+        180,
+        203,
+        155,
+        202,
+        131
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "organization"
+          ]
+        },
+        {
+          "name": "organization",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organization.org_id",
+                "account": "Organization"
+              }
+            ]
+          }
+        },
+        {
+          "name": "role",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organization"
+              },
+              {
+                "kind": "account",
+                "path": "role.name",
+                "account": "Role"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user"
+        },
+        {
+          "name": "member_role",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  98,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organization"
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_role",
+      "discriminator": [
+        139,
+        108,
+        157,
+        18,
+        175,
+        150,
+        155,
+        26
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "organization"
+          ]
+        },
+        {
+          "name": "organization",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organization.org_id",
+                "account": "Organization"
+              }
+            ]
+          }
+        },
+        {
+          "name": "role",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organization"
+              },
+              {
+                "kind": "account",
+                "path": "role.name",
+                "account": "Role"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_organization",
+      "discriminator": [
+        60,
+        173,
+        177,
+        39,
+        122,
+        23,
+        68,
+        185
+      ],
+      "accounts": [
+        {
+          "name": "super_admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "organization",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.org_count",
+                "account": "Config"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "admin",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "create_role",
+      "discriminator": [
+        170,
+        147,
+        127,
+        223,
+        222,
+        112,
+        205,
+        163
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "organization"
+          ]
+        },
+        {
+          "name": "organization",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organization.org_id",
+                "account": "Organization"
+              }
+            ]
+          }
+        },
+        {
+          "name": "role",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organization"
+              },
+              {
+                "kind": "arg",
+                "path": "role_name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "role_name",
+          "type": "string"
+        },
+        {
+          "name": "permissions",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "deactivate_organization",
+      "discriminator": [
+        56,
+        161,
+        52,
+        255,
+        157,
+        106,
+        158,
+        233
+      ],
+      "accounts": [
+        {
+          "name": "super_admin",
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "organization",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organization.org_id",
+                "account": "Organization"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize",
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "super_admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "protected_action",
+      "discriminator": [
+        65,
+        176,
+        17,
+        204,
+        221,
+        94,
+        6,
+        26
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "signer": true
+        },
+        {
+          "name": "organization",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organization.org_id",
+                "account": "Organization"
+              }
+            ]
+          }
+        },
+        {
+          "name": "member_role",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  98,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organization"
+              },
+              {
+                "kind": "account",
+                "path": "caller"
+              }
+            ]
+          }
+        },
+        {
+          "name": "role",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organization"
+              },
+              {
+                "kind": "account",
+                "path": "role.name",
+                "account": "Role"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "required_permission",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "revoke_role",
+      "discriminator": [
+        179,
+        232,
+        2,
+        180,
+        48,
+        227,
+        82,
+        7
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "organization"
+          ]
+        },
+        {
+          "name": "organization",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organization.org_id",
+                "account": "Organization"
+              }
+            ]
+          }
+        },
+        {
+          "name": "role",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organization"
+              },
+              {
+                "kind": "account",
+                "path": "role.name",
+                "account": "Role"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user"
+        },
+        {
+          "name": "member_role",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  98,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organization"
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "transfer_org_admin",
+      "discriminator": [
+        121,
+        230,
+        31,
+        151,
+        110,
+        124,
+        204,
+        63
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "organization"
+          ]
+        },
+        {
+          "name": "organization",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organization.org_id",
+                "account": "Organization"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "new_admin",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "update_role_permissions",
+      "discriminator": [
+        254,
+        11,
+        60,
+        45,
+        173,
+        224,
+        153,
+        89
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "organization"
+          ]
+        },
+        {
+          "name": "organization",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organization.org_id",
+                "account": "Organization"
+              }
+            ]
+          }
+        },
+        {
+          "name": "role",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organization"
+              },
+              {
+                "kind": "account",
+                "path": "role.name",
+                "account": "Role"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "new_permissions",
+          "type": "u16"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Config",
+      "discriminator": [
+        155,
+        12,
+        170,
+        224,
+        30,
+        250,
+        204,
+        130
+      ]
+    },
+    {
+      "name": "MemberRole",
+      "discriminator": [
+        251,
+        101,
+        123,
+        221,
+        100,
+        212,
+        225,
+        86
+      ]
+    },
+    {
+      "name": "Organization",
+      "discriminator": [
+        145,
+        38,
+        152,
+        251,
+        91,
+        57,
+        118,
+        160
+      ]
+    },
+    {
+      "name": "Role",
+      "discriminator": [
+        46,
+        219,
+        197,
+        24,
+        233,
+        249,
+        253,
+        154
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "OrgNameTooLong",
+      "msg": "Organization name exceeds maximum length of 32 characters"
+    },
+    {
+      "code": 6001,
+      "name": "RoleNameTooLong",
+      "msg": "Role name exceeds maximum length of 32 characters"
+    },
+    {
+      "code": 6002,
+      "name": "MaxRolesReached",
+      "msg": "Maximum number of roles per organization reached"
+    },
+    {
+      "code": 6003,
+      "name": "Unauthorized",
+      "msg": "Unauthorized: caller does not have the required permission"
+    },
+    {
+      "code": 6004,
+      "name": "OrgNotActive",
+      "msg": "Organization is not active"
+    },
+    {
+      "code": 6005,
+      "name": "MemberNotActive",
+      "msg": "Member is not active"
+    },
+    {
+      "code": 6006,
+      "name": "RoleHasMembers",
+      "msg": "Cannot close role with active members"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidPermissions",
+      "msg": "Invalid permissions bitmask"
+    },
+    {
+      "code": 6008,
+      "name": "MemberAlreadyExists",
+      "msg": "Member already has a role in this organization"
+    },
+    {
+      "code": 6009,
+      "name": "Overflow",
+      "msg": "Arithmetic overflow"
+    }
+  ],
+  "types": [
+    {
+      "name": "Config",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "super_admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "org_count",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MemberRole",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "org",
+            "type": "pubkey"
+          },
+          {
+            "name": "role",
+            "type": "pubkey"
+          },
+          {
+            "name": "is_active",
+            "type": "bool"
+          },
+          {
+            "name": "assigned_at",
+            "type": "i64"
+          },
+          {
+            "name": "assigned_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Organization",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "org_id",
+            "type": "u64"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "role_count",
+            "type": "u8"
+          },
+          {
+            "name": "member_count",
+            "type": "u16"
+          },
+          {
+            "name": "is_active",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Role",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "org",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "permissions",
+            "type": "u16"
+          },
+          {
+            "name": "member_count",
+            "type": "u16"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}

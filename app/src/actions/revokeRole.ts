@@ -1,0 +1,26 @@
+import { Program } from "@coral-xyz/anchor";
+import { PublicKey } from "@solana/web3.js";
+import { findOrgPda, findRolePda, findMemberRolePda } from "../pda";
+
+export async function revokeRole(
+  program: Program,
+  wallet: PublicKey,
+  orgId: number,
+  roleName: string,
+  user: PublicKey
+): Promise<string> {
+  const [orgPda] = findOrgPda(orgId);
+  const [rolePda] = findRolePda(orgPda, roleName);
+  const [memberRolePda] = findMemberRolePda(orgPda, user);
+
+  return program.methods
+    .revokeRole()
+    .accountsPartial({
+      admin: wallet,
+      organization: orgPda,
+      role: rolePda,
+      user: user,
+      memberRole: memberRolePda,
+    })
+    .rpc();
+}
