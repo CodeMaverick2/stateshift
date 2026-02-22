@@ -1,5 +1,3 @@
-![CI](https://github.com/CodeMaverick2/stateshift/actions/workflows/ci.yml/badge.svg)
-
 # StateShift: On-Chain RBAC System
 
 > A traditional Role-Based Access Control (RBAC) backend system rebuilt as a Solana on-chain program in Rust using the Anchor framework.
@@ -557,20 +555,6 @@ cd app && npm install && npm run dev
 | **Re-initialization** | Config PDA uses `init` constraint — second call fails (account already exists) |
 | **Deactivation bypass** | `is_active` constraint checked on all role/member mutations |
 | **Duplicate assignments** | PDA seeds include `(org, user)` — second assignment fails (PDA already exists) |
-
----
-
-## CI / CD
-
-GitHub Actions runs three parallel jobs on every push and pull request:
-
-| Job | What it does |
-|-----|-------------|
-| **Anchor Build & Test** | Installs Rust + Solana CLI + Anchor → `anchor build` → runs all 45 tests against a local validator |
-| **Frontend Build** | `cd app && npm ci && npm run build` — TypeScript type-check + Vite production build |
-| **CLI Build** | `cd cli && npm ci && npm run build` — TypeScript compilation |
-
-See [`.github/workflows/ci.yml`](.github/workflows/ci.yml) for the full workflow.
 
 ---
 
