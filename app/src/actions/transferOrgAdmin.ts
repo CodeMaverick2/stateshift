@@ -16,5 +16,5 @@ export async function transferOrgAdmin(
       admin: wallet,
       organization: orgPda,
     })
-    .rpc();
+    .rpc({ commitment: "confirmed" });
 }

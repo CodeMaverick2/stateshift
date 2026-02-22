@@ -22,5 +22,5 @@ export async function revokeRole(
       user: user,
       memberRole: memberRolePda,
     })
-    .rpc();
+    .rpc({ commitment: "confirmed" });
 }

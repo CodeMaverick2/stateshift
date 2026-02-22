@@ -21,5 +21,5 @@ export async function createOrganization(
       organization: orgPda,
       systemProgram: SystemProgram.programId,
     })
-    .rpc();
+    .rpc({ commitment: "confirmed" });
 }

@@ -23,5 +23,5 @@ export async function assignRole(
       memberRole: memberRolePda,
       systemProgram: SystemProgram.programId,
     })
-    .rpc();
+    .rpc({ commitment: "confirmed" });
 }

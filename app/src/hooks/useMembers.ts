@@ -24,6 +24,7 @@ export function useMembers(
   const { connection } = useConnection();
   const [members, setMembers] = useState<MemberEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -31,10 +32,12 @@ export function useMembers(
     async function fetchMembers() {
       if (!orgPubkey) {
         setMembers([]);
+        setError(null);
         return;
       }
 
       setLoading(true);
+      setError(null);
       try {
         const dummyWallet = {
           publicKey: findConfigPda()[0],
@@ -69,8 +72,11 @@ export function useMembers(
         }
 
         if (!cancelled) setMembers(results);
-      } catch {
-        if (!cancelled) setMembers([]);
+      } catch (err: any) {
+        if (!cancelled) {
+          setMembers([]);
+          setError(err.message || "Failed to fetch members");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -82,5 +88,5 @@ export function useMembers(
     };
   }, [connection, orgPubkey?.toBase58(), refreshCounter]);
 
-  return { members, loading };
+  return { members, loading, error };
 }

@@ -25,5 +25,5 @@ export async function protectedAction(
       memberRole: memberRolePda,
       role: rolePubkey,
     })
-    .rpc();
+    .rpc({ commitment: "confirmed" });
 }

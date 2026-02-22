@@ -14,5 +14,5 @@ export async function initialize(
       config: configPda,
       systemProgram: SystemProgram.programId,
     })
-    .rpc();
+    .rpc({ commitment: "confirmed" });
 }

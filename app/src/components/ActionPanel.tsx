@@ -1,11 +1,16 @@
-import { useState } from "react";
-import { PublicKey } from "@solana/web3.js";
+import { useState, useRef } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useProgram } from "../hooks/useProgram";
 import { useToast } from "./Toast";
 import GlassCard from "./GlassCard";
 import PermissionCheckboxes from "./PermissionCheckboxes";
 import LoadingSpinner from "./LoadingSpinner";
+import {
+  parsePublicKey,
+  validateOrgId,
+  validateName,
+  validatePermissions,
+} from "../validation";
 
 import { initialize } from "../actions/initialize";
 import { createOrganization } from "../actions/createOrganization";
@@ -23,9 +28,11 @@ interface Props {
 }
 
 function extractError(err: any): string {
+  // Anchor program error
   if (err.error?.errorCode) {
     return err.error.errorMessage || err.error.errorCode.code;
   }
+  // Parse logs for Anchor error messages
   if (err.logs) {
     const anchorErr = err.logs.find((l: string) => l.includes("Error Code:"));
     if (anchorErr) {
@@ -34,9 +41,16 @@ function extractError(err: any): string {
     }
   }
   const msg = err.message || "Transaction failed";
+  // Friendly mappings for common errors
   if (msg.includes("Account does not exist")) return "Account not found on-chain";
   if (msg.includes("User rejected")) return "Transaction cancelled by user";
-  return msg.length > 120 ? msg.slice(0, 117) + "..." : msg;
+  if (msg.includes("Blockhash not found")) return "Transaction expired — please try again";
+  if (msg.includes("Insufficient funds")) return "Insufficient SOL for transaction fees";
+  if (msg.includes("Invalid public key")) return "Invalid Solana address provided";
+  if (msg.includes("base58")) return "Invalid address format — check the pubkey";
+  if (msg.includes("already in use")) return "Account already exists on-chain";
+  if (msg.includes("custom program error: 0x0")) return "Config already initialized";
+  return msg.length > 140 ? msg.slice(0, 137) + "..." : msg;
 }
 
 const ICONS: Record<string, JSX.Element> = {
@@ -57,6 +71,7 @@ export default function ActionPanel({ onSuccess, onError }: Props) {
   const toast = useToast();
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const runningRef = useRef(false);
 
   const [orgName, setOrgName] = useState("");
   const [orgAdmin, setOrgAdmin] = useState("");
@@ -87,6 +102,9 @@ export default function ActionPanel({ onSuccess, onError }: Props) {
       toast.error("Connect your wallet first");
       return;
     }
+    // Double-submit guard
+    if (runningRef.current) return;
+    runningRef.current = true;
     setLoading(true);
     try {
       const sig = await fn();
@@ -95,9 +113,10 @@ export default function ActionPanel({ onSuccess, onError }: Props) {
     } catch (err: any) {
       const msg = extractError(err);
       toast.error(msg);
-      onError(`Failed: ${description} - ${msg}`);
+      onError(`Failed: ${description} — ${msg}`);
     } finally {
       setLoading(false);
+      runningRef.current = false;
     }
   }
 
@@ -128,8 +147,14 @@ export default function ActionPanel({ onSuccess, onError }: Props) {
         <div className="space-y-2.5">
           <input className={inputClass} placeholder="Organization name (max 32 chars)" value={orgName} onChange={(e) => setOrgName(e.target.value)} maxLength={32} />
           <input className={inputClass} placeholder="Admin pubkey (blank = your wallet)" value={orgAdmin} onChange={(e) => setOrgAdmin(e.target.value)} />
-          <button className={btnClass} disabled={loading || !orgName}
-            onClick={() => run(() => createOrganization(program!, publicKey!, orgName, orgAdmin ? new PublicKey(orgAdmin) : publicKey!), `Created org "${orgName}"`)}>
+          <button className={btnClass} disabled={loading || !orgName.trim()}
+            onClick={() => {
+              try {
+                const name = validateName(orgName, "Organization name");
+                const admin = orgAdmin.trim() ? parsePublicKey(orgAdmin) : publicKey!;
+                run(() => createOrganization(program!, publicKey!, name, admin), `Created org "${name}"`);
+              } catch (e: any) { toast.error(e.message); }
+            }}>
             {loading && <LoadingSpinner size="sm" />}Create Organization
           </button>
         </div>
@@ -143,8 +168,15 @@ export default function ActionPanel({ onSuccess, onError }: Props) {
           <input className={inputClass} placeholder="Org ID" value={roleOrgId} onChange={(e) => setRoleOrgId(e.target.value)} type="number" min="0" />
           <input className={inputClass} placeholder="Role name (max 32 chars)" value={roleName} onChange={(e) => setRoleName(e.target.value)} maxLength={32} />
           <PermissionCheckboxes value={rolePerms} onChange={setRolePerms} />
-          <button className={btnClass} disabled={loading || !roleOrgId || !roleName || !rolePerms}
-            onClick={() => run(() => createRole(program!, publicKey!, parseInt(roleOrgId), roleName, rolePerms), `Created role "${roleName}"`)}>
+          <button className={btnClass} disabled={loading || !roleOrgId || !roleName.trim() || !rolePerms}
+            onClick={() => {
+              try {
+                const oid = validateOrgId(roleOrgId);
+                const name = validateName(roleName, "Role name");
+                const perms = validatePermissions(rolePerms);
+                run(() => createRole(program!, publicKey!, oid, name, perms), `Created role "${name}"`);
+              } catch (e: any) { toast.error(e.message); }
+            }}>
             {loading && <LoadingSpinner size="sm" />}Create Role
           </button>
         </div>
@@ -158,8 +190,15 @@ export default function ActionPanel({ onSuccess, onError }: Props) {
           <input className={inputClass} placeholder="Org ID" value={assignOrgId} onChange={(e) => setAssignOrgId(e.target.value)} type="number" min="0" />
           <input className={inputClass} placeholder="Role name" value={assignRoleName} onChange={(e) => setAssignRoleName(e.target.value)} />
           <input className={inputClass} placeholder="User pubkey" value={assignUser} onChange={(e) => setAssignUser(e.target.value)} />
-          <button className={btnClass} disabled={loading || !assignOrgId || !assignRoleName || !assignUser}
-            onClick={() => run(() => assignRole(program!, publicKey!, parseInt(assignOrgId), assignRoleName, new PublicKey(assignUser)), `Assigned role "${assignRoleName}"`)}>
+          <button className={btnClass} disabled={loading || !assignOrgId || !assignRoleName.trim() || !assignUser.trim()}
+            onClick={() => {
+              try {
+                const oid = validateOrgId(assignOrgId);
+                const name = validateName(assignRoleName, "Role name");
+                const user = parsePublicKey(assignUser);
+                run(() => assignRole(program!, publicKey!, oid, name, user), `Assigned role "${name}"`);
+              } catch (e: any) { toast.error(e.message); }
+            }}>
             {loading && <LoadingSpinner size="sm" />}Assign Role
           </button>
         </div>
@@ -173,8 +212,15 @@ export default function ActionPanel({ onSuccess, onError }: Props) {
           <input className={inputClass} placeholder="Org ID" value={revokeOrgId} onChange={(e) => setRevokeOrgId(e.target.value)} type="number" min="0" />
           <input className={inputClass} placeholder="Role name" value={revokeRoleName} onChange={(e) => setRevokeRoleName(e.target.value)} />
           <input className={inputClass} placeholder="User pubkey" value={revokeUser} onChange={(e) => setRevokeUser(e.target.value)} />
-          <button className={btnClass} disabled={loading || !revokeOrgId || !revokeRoleName || !revokeUser}
-            onClick={() => run(() => revokeRole(program!, publicKey!, parseInt(revokeOrgId), revokeRoleName, new PublicKey(revokeUser)), `Revoked role "${revokeRoleName}"`)}>
+          <button className={btnClass} disabled={loading || !revokeOrgId || !revokeRoleName.trim() || !revokeUser.trim()}
+            onClick={() => {
+              try {
+                const oid = validateOrgId(revokeOrgId);
+                const name = validateName(revokeRoleName, "Role name");
+                const user = parsePublicKey(revokeUser);
+                run(() => revokeRole(program!, publicKey!, oid, name, user), `Revoked role "${name}"`);
+              } catch (e: any) { toast.error(e.message); }
+            }}>
             {loading && <LoadingSpinner size="sm" />}Revoke Role
           </button>
         </div>
@@ -188,8 +234,15 @@ export default function ActionPanel({ onSuccess, onError }: Props) {
           <input className={inputClass} placeholder="Org ID" value={updateOrgId} onChange={(e) => setUpdateOrgId(e.target.value)} type="number" min="0" />
           <input className={inputClass} placeholder="Role name" value={updateRoleName} onChange={(e) => setUpdateRoleName(e.target.value)} />
           <PermissionCheckboxes value={updatePerms} onChange={setUpdatePerms} />
-          <button className={btnClass} disabled={loading || !updateOrgId || !updateRoleName || !updatePerms}
-            onClick={() => run(() => updateRolePermissions(program!, publicKey!, parseInt(updateOrgId), updateRoleName, updatePerms), `Updated "${updateRoleName}" permissions`)}>
+          <button className={btnClass} disabled={loading || !updateOrgId || !updateRoleName.trim() || !updatePerms}
+            onClick={() => {
+              try {
+                const oid = validateOrgId(updateOrgId);
+                const name = validateName(updateRoleName, "Role name");
+                const perms = validatePermissions(updatePerms);
+                run(() => updateRolePermissions(program!, publicKey!, oid, name, perms), `Updated "${name}" permissions`);
+              } catch (e: any) { toast.error(e.message); }
+            }}>
             {loading && <LoadingSpinner size="sm" />}Update Permissions
           </button>
         </div>
@@ -202,8 +255,14 @@ export default function ActionPanel({ onSuccess, onError }: Props) {
         <div className="space-y-2.5">
           <input className={inputClass} placeholder="Org ID" value={transferOrgId} onChange={(e) => setTransferOrgId(e.target.value)} type="number" min="0" />
           <input className={inputClass} placeholder="New admin pubkey" value={transferNewAdmin} onChange={(e) => setTransferNewAdmin(e.target.value)} />
-          <button className={btnClass} disabled={loading || !transferOrgId || !transferNewAdmin}
-            onClick={() => run(() => transferOrgAdmin(program!, publicKey!, parseInt(transferOrgId), new PublicKey(transferNewAdmin)), `Transferred admin for org ${transferOrgId}`)}>
+          <button className={btnClass} disabled={loading || !transferOrgId || !transferNewAdmin.trim()}
+            onClick={() => {
+              try {
+                const oid = validateOrgId(transferOrgId);
+                const admin = parsePublicKey(transferNewAdmin);
+                run(() => transferOrgAdmin(program!, publicKey!, oid, admin), `Transferred admin for org ${oid}`);
+              } catch (e: any) { toast.error(e.message); }
+            }}>
             {loading && <LoadingSpinner size="sm" />}Transfer Admin
           </button>
         </div>
@@ -216,7 +275,12 @@ export default function ActionPanel({ onSuccess, onError }: Props) {
         <div className="space-y-2.5">
           <input className={inputClass} placeholder="Org ID" value={deactivateOrgId} onChange={(e) => setDeactivateOrgId(e.target.value)} type="number" min="0" />
           <button className={btnClass} disabled={loading || !deactivateOrgId}
-            onClick={() => run(() => deactivateOrg(program!, publicKey!, parseInt(deactivateOrgId)), `Deactivated org ${deactivateOrgId}`)}>
+            onClick={() => {
+              try {
+                const oid = validateOrgId(deactivateOrgId);
+                run(() => deactivateOrg(program!, publicKey!, oid), `Deactivated org ${oid}`);
+              } catch (e: any) { toast.error(e.message); }
+            }}>
             {loading && <LoadingSpinner size="sm" />}Deactivate
           </button>
         </div>
@@ -229,8 +293,14 @@ export default function ActionPanel({ onSuccess, onError }: Props) {
         <div className="space-y-2.5">
           <input className={inputClass} placeholder="Org ID" value={closeOrgId} onChange={(e) => setCloseOrgId(e.target.value)} type="number" min="0" />
           <input className={inputClass} placeholder="Role name" value={closeRoleName} onChange={(e) => setCloseRoleName(e.target.value)} />
-          <button className={btnClass} disabled={loading || !closeOrgId || !closeRoleName}
-            onClick={() => run(() => closeRole(program!, publicKey!, parseInt(closeOrgId), closeRoleName), `Closed role "${closeRoleName}"`)}>
+          <button className={btnClass} disabled={loading || !closeOrgId || !closeRoleName.trim()}
+            onClick={() => {
+              try {
+                const oid = validateOrgId(closeOrgId);
+                const name = validateName(closeRoleName, "Role name");
+                run(() => closeRole(program!, publicKey!, oid, name), `Closed role "${name}"`);
+              } catch (e: any) { toast.error(e.message); }
+            }}>
             {loading && <LoadingSpinner size="sm" />}Close Role
           </button>
         </div>

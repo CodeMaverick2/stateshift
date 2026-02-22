@@ -16,6 +16,7 @@ export function useOrganizations(orgCount: number, refreshCounter: number) {
   const { connection } = useConnection();
   const [orgs, setOrgs] = useState<OrgEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -24,10 +25,12 @@ export function useOrganizations(orgCount: number, refreshCounter: number) {
       if (orgCount === 0) {
         setOrgs([]);
         setLoading(false);
+        setError(null);
         return;
       }
 
       setLoading(true);
+      setError(null);
       try {
         const dummyWallet = {
           publicKey: findConfigPda()[0],
@@ -57,8 +60,11 @@ export function useOrganizations(orgCount: number, refreshCounter: number) {
         }
 
         if (!cancelled) setOrgs(results);
-      } catch {
-        if (!cancelled) setOrgs([]);
+      } catch (err: any) {
+        if (!cancelled) {
+          setOrgs([]);
+          setError(err.message || "Failed to fetch organizations");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -70,5 +76,5 @@ export function useOrganizations(orgCount: number, refreshCounter: number) {
     };
   }, [connection, orgCount, refreshCounter]);
 
-  return { orgs, loading };
+  return { orgs, loading, error };
 }

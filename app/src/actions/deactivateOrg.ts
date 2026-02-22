@@ -17,5 +17,5 @@ export async function deactivateOrg(
       config: configPda,
       organization: orgPda,
     })
-    .rpc();
+    .rpc({ commitment: "confirmed" });
 }

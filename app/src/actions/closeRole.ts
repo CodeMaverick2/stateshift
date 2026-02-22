@@ -18,5 +18,5 @@ export async function closeRole(
       organization: orgPda,
       role: rolePda,
     })
-    .rpc();
+    .rpc({ commitment: "confirmed" });
 }

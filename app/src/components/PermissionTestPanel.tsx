@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useProgram } from "../hooks/useProgram";
 import { useToast } from "./Toast";
 import { PERMISSIONS } from "../constants";
 import { protectedAction } from "../actions/protectedAction";
+import { validateOrgId } from "../validation";
 import GlassCard from "./GlassCard";
 import LoadingSpinner from "./LoadingSpinner";
 import { explorerTxUrl } from "../explorer";
@@ -32,6 +33,7 @@ export default function PermissionTestPanel({ onResult }: Props) {
     PERMISSIONS[0].value
   );
   const [loading, setLoading] = useState(false);
+  const runningRef = useRef(false);
   const [result, setResult] = useState<{
     success: boolean;
     message: string;
@@ -40,7 +42,17 @@ export default function PermissionTestPanel({ onResult }: Props) {
 
   async function testPermission() {
     if (!program || !publicKey || !orgId) return;
+    if (runningRef.current) return;
 
+    let oid: number;
+    try {
+      oid = validateOrgId(orgId);
+    } catch (e: any) {
+      toast.error(e.message);
+      return;
+    }
+
+    runningRef.current = true;
     setLoading(true);
     setResult(null);
     const permName =
@@ -50,7 +62,7 @@ export default function PermissionTestPanel({ onResult }: Props) {
       const sig = await protectedAction(
         program,
         publicKey,
-        parseInt(orgId),
+        oid,
         selectedPerm
       );
       setResult({
@@ -75,6 +87,7 @@ export default function PermissionTestPanel({ onResult }: Props) {
       onResult("", `Permission test: ${permName} - DENIED`, "error");
     } finally {
       setLoading(false);
+      runningRef.current = false;
     }
   }
 

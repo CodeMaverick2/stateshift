@@ -19,5 +19,5 @@ export async function updateRolePermissions(
       organization: orgPda,
       role: rolePda,
     })
-    .rpc();
+    .rpc({ commitment: "confirmed" });
 }

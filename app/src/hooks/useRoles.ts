@@ -22,6 +22,7 @@ export function useRoles(
   const { connection } = useConnection();
   const [roles, setRoles] = useState<RoleEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -29,10 +30,12 @@ export function useRoles(
     async function fetchRoles() {
       if (!orgPubkey) {
         setRoles([]);
+        setError(null);
         return;
       }
 
       setLoading(true);
+      setError(null);
       try {
         const dummyWallet = {
           publicKey: findConfigPda()[0],
@@ -65,8 +68,11 @@ export function useRoles(
         }
 
         if (!cancelled) setRoles(results);
-      } catch {
-        if (!cancelled) setRoles([]);
+      } catch (err: any) {
+        if (!cancelled) {
+          setRoles([]);
+          setError(err.message || "Failed to fetch roles");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -78,5 +84,5 @@ export function useRoles(
     };
   }, [connection, orgPubkey?.toBase58(), refreshCounter]);
 
-  return { roles, loading };
+  return { roles, loading, error };
 }
