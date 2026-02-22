@@ -20,17 +20,29 @@ const icon = (
   </svg>
 );
 
+function escapeCsv(value: string): string {
+  if (value.includes(",") || value.includes('"') || value.includes("\n")) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
+}
+
 function downloadLogs(transactions: TransactionEntry[]) {
   const lines = transactions.map(
     (tx) =>
-      `${new Date(tx.timestamp).toISOString()}\t${tx.status}\t${tx.description}\t${tx.sig || "—"}`
+      [
+        new Date(tx.timestamp).toISOString(),
+        tx.status,
+        escapeCsv(tx.description),
+        tx.sig || "",
+      ].join(",")
   );
-  const csv = ["Timestamp\tStatus\tDescription\tSignature", ...lines].join("\n");
-  const blob = new Blob([csv], { type: "text/tab-separated-values" });
+  const csv = ["Timestamp,Status,Description,Signature", ...lines].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `stateshift-txlog-${Date.now()}.tsv`;
+  a.download = `stateshift-txlog-${Date.now()}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
